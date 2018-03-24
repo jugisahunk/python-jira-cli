@@ -7,15 +7,17 @@ parser.add_argument("query", help="JQL query", type=str)
 parser.parse_args()
 args = parser.parse_args()
 
-with open("config/credentials.yml", 'r') as ymlfile:
+query_api = "/rest/api/latest/search?jql="
+
+with open("config/jira.yml", 'r') as ymlfile:
     try:
-        credentials = yaml.load(ymlfile)
+        jira = yaml.load(ymlfile)
     except yaml.YAMLError as exception:
         print(exception)
         sys.exit(1)
 
-url = 'https://vitals.atlassian.net/rest/api/latest/search?jql=' + args.query
+url = jira["host"] + query_api + args.query
 
-r = requests.get(url, auth=(credentials['username'], credentials['password']))
+r = requests.get(url, auth=(jira['username'], jira['password']))
 print(r.status_code)
 print(r.text)
