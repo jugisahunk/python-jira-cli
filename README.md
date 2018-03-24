@@ -14,4 +14,4 @@ password: schfifteen
 4) Run ```pip install -r requirements.txt```
 
 # Using ```query.py```
-The query script takes a single, positional argument called ```query``` and runs it against your cloud instance of Jira using the latest version of the api
+The query script takes a single, positional argument called ```query``` and runs it against your cloud instance of Jira using the latest version of the api. Currently it will only print out the response status code and the JSON payload.
