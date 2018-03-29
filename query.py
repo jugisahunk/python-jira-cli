@@ -14,7 +14,12 @@ from aiohttp import ClientSession
 async def fetch(url, session):
     async with session.get(url) as response:
         t = '{0:%H:%M:%S}'.format(datetime.datetime.now())
-        print('Done: {}, {} ({})'.format(t, response.url, response.status))        
+        if(response.status == 200):
+            print('Done: {}, {} ({})'.format(t, response.url, response.status))      
+        else:
+            print("############FAILURE############")
+            print('Done: {}, {} ({})'.format(t, response.url, response.status))      
+
         return await response.text()
 
 async def run(r,url):
@@ -24,7 +29,8 @@ async def run(r,url):
     # Fetch all responses within one Client session,
     # keep connection alive for all requests.
     auth = aiohttp.BasicAuth(login=jira['username'], password=jira['password'])
-    async with ClientSession(auth=auth) as session:
+    conn = aiohttp.TCPConnector(limit=30)
+    async with ClientSession(auth=auth, connector=conn) as session:
         for i in range(r):
             task = asyncio.ensure_future(fetch(url + "&startAt={}".format(i*50), session))
             tasks.append(task)
@@ -72,6 +78,7 @@ if(total_results > 50):
     loop = asyncio.get_event_loop()
     future = asyncio.ensure_future(run(task_count, url))
     all_issues = loop.run_until_complete(future)
+    loop.close()
 else:
     all_issues = json_data_parsed["issues"]
 
