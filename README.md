@@ -17,4 +17,7 @@ password: schfifteen
 4) Run ```pip install -r requirements.txt```
 
 # Using ```query.py```
-The query script takes a single, positional argument called ```query``` and runs it against your cloud instance of Jira using the latest version of the api. Currently it will only print out the response status code and the JSON payload for the first page of results.
+To generate query results to csv, call ```query.py``` using the ```query``` and ```--csv``` arguments from your terminal. To retrieve all issues created in the last week, you could use the following example:
+
+```python3 query.py --csv="results.csv" "created > -7d"```
+
