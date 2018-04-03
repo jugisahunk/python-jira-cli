@@ -8,6 +8,7 @@ import csv
 import json
 import time
 import datetime
+import jmespath
 
 from aiohttp import ClientSession
 
@@ -85,17 +86,27 @@ else:
 print("Found {} issues. Retrieved {}".format(total_results, len(all_issues)))
 
 if(args.csv):
-
-    print("issues returned: " + str(len(all_issues)))
+    with open('config/fields.json') as json_file:
+        fields = json.load(json_file)
+    
+    csv_columns = jmespath.compile('[*].name').search(fields)
+    csv_value_paths = jmespath.compile('[*].value').search(fields)
 
     with open(args.csv + ".csv", 'w') as csvfile:
-
         csv_writer = csv.writer(csvfile)
-
-        csv_writer.writerow(["key","url","summary"])
+        csv_writer.writerow(csv_columns)
         for issue in all_issues:
-            issue_key = issue["key"]
-            url = jira["host"] + "/browse/" + issue_key
-            summary = issue["fields"]["summary"]
+            issue_values = []
+            for path in csv_value_paths:
+                expression = jmespath.compile(path[0]) #jmespath expression
+                field_value = expression.search(issue)
+                
+                if(len(path) == 2):
+                    value_format = path[1] #value output format
+                    output_value = value_format.replace('[host]', jira['host']).format(field_value)
+                else:
+                    output_value = field_value
 
-            csv_writer.writerow([issue_key, url, summary])
+                issue_values.append(output_value)
+            
+            csv_writer.writerow(issue_values)
