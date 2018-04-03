@@ -2,9 +2,13 @@
 This is a cli tool for querying Jira. It uses basic authentication. To use it, you'll need to use the username and password credentials for a user with read access to the Jira cloud instance you wish to query against.
 
 # Jira REST API
-You need to reference the [Jira Cloud REST API](https://developer.atlassian.com/cloud/jira/platform/rest/) when adding functionality to this tool. We will default to using the latest version whenever possible. Go here to jump right to the [search api](https://developer.atlassian.com/cloud/jira/platform/rest/#api-api-2-search-get).
+You need to refereance the [Jira Cloud REST API](https://developer.atlassian.com/cloud/jira/platform/rest/) when adding functionality to this tool. We will default to using the latest version whenever possible. Go here to jump right to the [search api](https://developer.atlassian.com/cloud/jira/platform/rest/#api-api-2-search-get).
+
 # Using ```query.py```
-The query script takes a single, positional argument called ```query``` and runs it against your cloud instance of Jira using the latest version of the api. Currently it will only print out the response status code and the JSON payload for the first page of results.
+To generate query results to csv, call ```query.py``` using the ```query``` and ```--csv``` arguments from your terminal. To retrieve all issues created in the last week, you could use the following example:
+
+```python3 query.py --csv="results.csv" "created > -7d"```
+
 # Configuration
 
 ## Script Config
@@ -74,4 +78,3 @@ url |
 |---|
 | https://myjira.atlassian.net/browse/XYZ-100 |
 | https://myjira.atlassian.net/browse/XYZ-101 |
-q
