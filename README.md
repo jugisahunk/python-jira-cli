@@ -7,7 +7,7 @@ You need to refereance the [Jira Cloud REST API](https://developer.atlassian.com
 # Using ```query.py```
 To generate query results to csv, call ```query.py``` using the ```query``` and ```--csv``` arguments from your terminal. To retrieve all issues created in the last week, you could use the following example:
 
-```python3 query.py --csv="results.csv" "created > -7d"```
+```python3 query.py --csv="results" "created > -7d"```
 
 # Configuration
 
@@ -38,8 +38,14 @@ Here's an example that outputs only the *key* and *summary* fields of issues ret
 
 ```
 [
-    { "name" : "key", "value" : ["key"] },
-    { "name" : "summary", "value" : ["fields.summary"] }
+    { 
+        "name" : "key", 
+        "value" : ["key"] 
+    },
+    { 
+        "name" : "summary", 
+        "value" : ["fields.summary"] 
+    }
 ]
 ```
 ***Outputs***
@@ -50,11 +56,14 @@ key | summary |
 
 ### Formatting Examples
 
-##### *Basic String format*
+#### *Basic String format*
 This utilizes the basic string formatting functionality in python; the ```{}``` is simply replaced by the value output by the JMESPath expression. The following is an example assuming a Jira issue with the key of 'ABC-15':
 ```
 [
-    { "name" : "Key Greeting", "value" : ["key", "Hello, my key is {}"] }
+    { 
+        "name" : "Key Greeting", 
+        "value" : ["key", "Hello, my key is {}"] 
+    }
 ]
 ```
 This mapping outputs the record: 
@@ -62,15 +71,18 @@ Key Greeting |
 |---|
 | Hello, my value is: ABC-15 |
 
-##### *Config value options:*
+#### *Config value options:*
 The formatting knows to look for certain keywords and replace them with helpful data:
 - ```[host]``` get's replaced by the ```host``` value specified in the ```jira.yml``` file
 
-##### *Combined example*
+#### *Combined example*
 The basic format may be combined with the config value keywords. For instance, you could output the instance url for browsing to an issue with the following field config:
 ```
 [
-    { "name" : "url", "value" : ["key","[host]/browse/{}"]
+    { 
+        "name" : "url", 
+        "value" : ["key","[host]/browse/{}"]
+    }
 ]
 ```
 Assuming the configured host value is ```https://myjira.atlassian.net``` and the issue keys returned are XYZ-100 and XYZ-101, This mapping outputs the record: 
@@ -78,3 +90,9 @@ url |
 |---|
 | https://myjira.atlassian.net/browse/XYZ-100 |
 | https://myjira.atlassian.net/browse/XYZ-101 |
+
+### Field Treatments
+Though most fields can be easily output as single values, some may require *special treatment*. In those cases, refer to [JMESPath specifications](http://jmespath.readthedocs.io/en/latest/specification.html) for help. As a quick example, you could join together all values in a multi-value field with the ```|``` character with the following JMESPath expression where ```@``` represents the path to the multi-value field:
+```
+join(`|`, @)
+```
