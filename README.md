@@ -49,7 +49,8 @@ Here's an example that outputs only the *key* and *summary* fields of issues ret
 ]
 ```
 ***Outputs***
-key | summary |
+
+|key | summary |
 |---|---|
 | ABC-15 | A jira issue summary value |
 | ABC-16 | A second jira issue summary value |
@@ -66,8 +67,9 @@ This utilizes the basic string formatting functionality in python; the ```{}``` 
     }
 ]
 ```
-This mapping outputs the record: 
-Key Greeting |
+This mapping outputs the record:
+
+|Key Greeting|
 |---|
 | Hello, my value is: ABC-15 |
 
@@ -86,7 +88,8 @@ The basic format may be combined with the config value keywords. For instance, y
 ]
 ```
 Assuming the configured host value is ```https://myjira.atlassian.net``` and the issue keys returned are XYZ-100 and XYZ-101, This mapping outputs the record: 
-url |
+
+|url |
 |---|
 | https://myjira.atlassian.net/browse/XYZ-100 |
 | https://myjira.atlassian.net/browse/XYZ-101 |
