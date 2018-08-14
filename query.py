@@ -9,6 +9,7 @@ import json
 import time
 import datetime
 import jmespath
+import sys
 
 from aiohttp import ClientSession
 
@@ -68,11 +69,23 @@ url = jira["host"] + search_api + args.query
 
 print("querying: " + args.query)
 print("hitting url: " + url)
-
 r = requests.get(url, auth=(jira['username'], jira['password']))
 print("Status: {}".format(r.status_code))
 
 json_data_parsed = json.loads(r.text)
+
+if(r.status_code != 200):
+    print("request returned with error code: {}".format(r.status_code))
+
+    for error in json_data_parsed["errorMessages"]:
+        print("Error: {}".format(error))
+
+    for warning in json_data_parsed["warningMessages"]:
+        print("Warning: {}".format(warning))
+
+    sys.exit(1)
+
+
 total_results = json_data_parsed["total"]
 print("Found {} total results.".format(total_results))
 
