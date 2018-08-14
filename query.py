@@ -67,6 +67,8 @@ with open("config/jira.yml", 'r') as ymlfile:
 url = jira["host"] + search_api + args.query
 
 print("querying: " + args.query)
+print("hitting url: " + url)
+
 r = requests.get(url, auth=(jira['username'], jira['password']))
 print("Status: {}".format(r.status_code))
 
