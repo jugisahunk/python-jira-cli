@@ -50,9 +50,15 @@ def get_response_issues(response_texts):
     
     return all_issues
 
+def get_cycle_data(issue):
+    return ["cycle_start_datetime", "cycle_end_datetime", "cycle_duration"]
+
 parser = argparse.ArgumentParser()
 parser.add_argument("query", help="JQL query", type=str)
-parser.add_argument("--csv", help="CSV Output Filename", type=str)
+parser.add_argument("--csv", help="CSV Output Filename", type=str, default="results")
+parser.add_argument("-c", 
+        help="Include Cycle Time Data. Assumes cycle begins with \"In Progress\" and ends with \"Resolved.\" Ignores issues which never entered \"In Progress\"", 
+        action='store_true')
 parser.parse_args()
 args = parser.parse_args()
 
@@ -100,28 +106,36 @@ else:
 
 print("Found {} issues. Retrieved {}".format(total_results, len(all_issues)))
 
-if(args.csv):
-    with open('config/fields.json') as json_file:
-        fields = json.load(json_file)
-    
-    csv_columns = jmespath.compile('[*].name').search(fields)
-    csv_value_paths = jmespath.compile('[*].value').search(fields)
+with open('config/fields.json') as json_file:
+    fields = json.load(json_file)
 
-    with open(args.csv + ".csv", 'w') as csvfile:
-        csv_writer = csv.writer(csvfile)
-        csv_writer.writerow(csv_columns)
-        for issue in all_issues:
-            issue_values = []
-            for path in csv_value_paths:
-                expression = jmespath.compile(path[0]) #jmespath expression
-                field_value = expression.search(issue)
-                
-                if(len(path) == 2):
-                    value_format = path[1] #value output format
-                    output_value = value_format.replace('[host]', jira['host']).format(field_value)
-                else:
-                    output_value = field_value
+csv_columns = jmespath.compile('[*].name').search(fields)
 
-                issue_values.append(output_value)
+if(args.c):
+    csv_columns.extend(["cycle_start", "cycle_end", "cycle_time"])
+
+csv_value_paths = jmespath.compile('[*].value').search(fields)
+
+print("Writing results to {file_name}.csv".format(file_name=args.csv))
+
+with open(args.csv + ".csv", 'w') as csvfile:
+    csv_writer = csv.writer(csvfile)
+    csv_writer.writerow(csv_columns)
+    for issue in all_issues:
+        issue_values = []
+        for path in csv_value_paths:
+            expression = jmespath.compile(path[0]) #jmespath expression
+            field_value = expression.search(issue)
             
-            csv_writer.writerow(issue_values)
+            if(len(path) == 2):
+                value_format = path[1] #value output format
+                output_value = value_format.replace('[host]', jira['host']).format(field_value)
+            else:
+                output_value = field_value
+
+            issue_values.append(output_value)
+
+        if(args.c):
+            issue_values.extend(get_cycle_data(issue))
+        
+        csv_writer.writerow(issue_values)
