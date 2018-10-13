@@ -62,7 +62,10 @@ parser.add_argument("-c",
 parser.parse_args()
 args = parser.parse_args()
 
-search_api = "/rest/api/latest/search?jql="
+expand_clause = "expand=changelog&" if args.c else ""
+query_clause = "jql={query}".format(query=args.query)
+
+search_api = "/rest/api/latest/search?{expand}{query}".format(expand=expand_clause, query=query_clause)
 
 with open("config/jira.yml", 'r') as ymlfile:
     try:
@@ -71,7 +74,7 @@ with open("config/jira.yml", 'r') as ymlfile:
         print(exception)
         sys.exit(1)
 
-url = jira["host"] + search_api + args.query
+url = jira["host"] + search_api
 
 print("querying: " + args.query)
 print("hitting url: " + url)
