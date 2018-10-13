@@ -5,9 +5,31 @@ This is a cli tool for querying Jira. It uses basic authentication. To use it, y
 You need to refereance the [Jira Cloud REST API](https://developer.atlassian.com/cloud/jira/platform/rest/) when adding functionality to this tool. We will default to using the latest version whenever possible. Go here to jump right to the [search api](https://developer.atlassian.com/cloud/jira/platform/rest/#api-api-2-search-get).
 
 # Using ```query.py```
-To generate query results to csv, call ```query.py``` using the ```query``` and ```--csv``` arguments from your terminal. To retrieve all issues created in the last week, you could use the following example:
+```
+usage: query.py [-h] [--csv CSV] [-c] query
 
-```python3 query.py --csv="results" "created > -7d"```
+positional arguments:
+  query       JQL query
+
+optional arguments:
+  -h, --help  show this help message and exit
+  --csv CSV   CSV Output Filename
+  -c          Include Cycle Time Data. Assumes cycle begins with "In Progress"
+              and ends with "Resolved." Ignores issues which never entered "In
+              Progress"
+```
+## Examples:
+To retrieve all issues created in the last week and store them in a csv file named "last_week.csv" you would run:
+
+```python3 query.py --csv="last_week" "created > -7d"```
+
+If I wanted to add in cycle time data for those issues, I'd modify the line like so:
+
+```python3 query.py -c --csv="last_week" "created > -7d"```
+
+If I didn't care to name the file anything special:
+
+```python3 query.py -c "created > -7d"```
 
 # Configuration
 
@@ -99,3 +121,4 @@ Though most fields can be easily output as single values, some may require *spec
 ```
 join(`|`, @)
 ```
+

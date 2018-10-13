@@ -8,6 +8,7 @@ import csv
 import json
 import time
 import datetime
+import dateutil.parser
 import jmespath
 import sys
 
@@ -51,7 +52,29 @@ def get_response_issues(response_texts):
     return all_issues
 
 def get_cycle_data(issue):
-    return ["cycle_start_datetime", "cycle_end_datetime", "cycle_duration"]
+    if(issue["fields"]["status"]["name"] == "Resolved"):
+        histories = issue["changelog"]["histories"]
+        starts = []
+        ends = []
+        for history in histories:
+            history_created = dateutil.parser.parse(history["created"])
+
+            starts.extend([history_created for item in history["items"] 
+                if item["field"] == "status" and
+                   item["toString"] == "In Progress"])
+
+            ends.extend([history_created for item in history["items"] 
+                if item["field"] == "status" and
+                   item["toString"] == "Resolved"])
+
+        if starts:
+            cycle_start = min(starts)
+            cycle_end = max(ends)
+            cycle_time = (cycle_end - cycle_start).seconds /60
+
+            return [cycle_start, cycle_end, cycle_time]
+
+    return []
 
 parser = argparse.ArgumentParser()
 parser.add_argument("query", help="JQL query", type=str)
