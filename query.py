@@ -70,7 +70,7 @@ def get_cycle_data(issue):
         if starts:
             cycle_start = min(starts)
             cycle_end = max(ends)
-            cycle_time = (cycle_end - cycle_start).seconds /60
+            cycle_time = (cycle_end - cycle_start).total_seconds() / 60
 
             return [cycle_start, cycle_end, cycle_time]
 
