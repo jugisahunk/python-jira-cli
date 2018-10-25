@@ -53,6 +53,7 @@ def get_response_issues(response_texts):
 
 def get_cycle_data(issue):
     if(issue["fields"]["status"]["name"] == "Resolved"):
+        date_format = "%Y-%m-%d %H:%M:%S"
         histories = issue["changelog"]["histories"]
         starts = []
         ends = []
@@ -72,15 +73,41 @@ def get_cycle_data(issue):
             cycle_end = max(ends)
             cycle_time = (cycle_end - cycle_start).total_seconds() / 60
 
-            return [cycle_start, cycle_end, cycle_time]
+            return [cycle_start.strftime("%Y/%m/%d %H:%M:%S"), cycle_end.strftime("%Y/%m/%d %H:%M:%S"), cycle_time]
 
-    return []
+    return ["","",""]
+
+def get_lead_data(issue):
+    if(issue["fields"]["status"]["name"] == "Resolved"):
+        histories = issue["changelog"]["histories"]
+        if(issue["key"] == "PUI-11786"):
+            print(len(histories))
+        ends = []
+        for history in histories:
+            history_created = dateutil.parser.parse(history["created"])
+
+            ends.extend([history_created for item in history["items"] 
+                if item["field"] == "status" and
+                   item["toString"] == "Resolved"])
+
+        if ends:
+            lead_start = dateutil.parser.parse(issue["fields"]["created"])
+            lead_end = max(ends)
+            lead_time = (lead_end - lead_start).total_seconds() / 60
+
+            return [lead_start.strftime("%Y/%m/%d %H:%M:%S"), lead_end.strftime("%Y/%m/%d %H:%M:%S"), lead_time]
+
+    return ["","",""]
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("query", help="JQL query", type=str)
 parser.add_argument("--csv", help="CSV Output Filename", type=str, default="results")
 parser.add_argument("-c", 
         help="Include Cycle Time Data. Assumes cycle begins with \"In Progress\" and ends with \"Resolved.\" Ignores issues which never entered \"In Progress\"", 
+        action='store_true')
+parser.add_argument("-l", 
+        help="Include Lead Time Data. Assumes lead begins with \"Open\" and ends with \"Resolved.\"", 
         action='store_true')
 parser.parse_args()
 args = parser.parse_args()
@@ -140,6 +167,9 @@ csv_columns = jmespath.compile('[*].name').search(fields)
 if(args.c):
     csv_columns.extend(["cycle_start", "cycle_end", "cycle_time"])
 
+if(args.l):
+    csv_columns.extend(["lead_start", "lead_end", "lead_time"])
+
 csv_value_paths = jmespath.compile('[*].value').search(fields)
 
 print("Writing results to {file_name}.csv".format(file_name=args.csv))
@@ -163,5 +193,8 @@ with open(args.csv + ".csv", 'w') as csvfile:
 
         if(args.c):
             issue_values.extend(get_cycle_data(issue))
+
+        if(args.l):
+            issue_values.extend(get_lead_data(issue))
         
         csv_writer.writerow(issue_values)

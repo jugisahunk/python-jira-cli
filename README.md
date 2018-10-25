@@ -6,7 +6,7 @@ You need to refereance the [Jira Cloud REST API](https://developer.atlassian.com
 
 # Using ```query.py```
 ```
-usage: query.py [-h] [--csv CSV] [-c] query
+usage: query.py [-h] [--csv CSV] [-c] [-l] query
 
 positional arguments:
   query       JQL query
@@ -17,6 +17,8 @@ optional arguments:
   -c          Include Cycle Time Data. Assumes cycle begins with "In Progress"
               and ends with "Resolved." Ignores issues which never entered "In
               Progress"
+  -l          Include Lead Time Data. Assumes lead begins with "Open" and ends
+              with "Resolved."
 ```
 ## Examples:
 To retrieve all issues created in the last week and store them in a csv file named "last_week.csv" you would run:
