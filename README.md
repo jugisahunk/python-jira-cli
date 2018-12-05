@@ -1,6 +1,8 @@
 # Introduction
 This is a cli tool for querying Jira. It uses basic authentication. To use it, you'll need to use the username and password credentials for a user with read access to the Jira cloud instance you wish to query against.
 
+# Setup
+This CLI tool is tested to work using python 3.7.1. It will _not_ work on python 2.7.*. If you're on a mac, head to [python.org](https://www.python.org/downloads/) to download and install it or use brew. Here's a good guide to [using brew](https://docs.python-guide.org/starting/install3/osx/) as your installer.
 # Jira REST API
 You need to refereance the [Jira Cloud REST API](https://developer.atlassian.com/cloud/jira/platform/rest/) when adding functionality to this tool. We will default to using the latest version whenever possible. Go here to jump right to the [search api](https://developer.atlassian.com/cloud/jira/platform/rest/#api-api-2-search-get).
 
