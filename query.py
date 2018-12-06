@@ -104,10 +104,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument("query", help="JQL query", type=str)
 parser.add_argument("--csv", help="CSV Output Filename", type=str, default="results")
 parser.add_argument("-c", 
-        help="Include Cycle Time Data. Assumes cycle begins with \"In Progress\" and ends with \"Resolved.\" Ignores issues which never entered \"In Progress\"", 
+        help="Include Cycle Time Data. Assumes cycle begins with \"In Progress\" and ends with \"Resolved.\" Ignores issues which never entered \"In Progress\". Time is given in minutes.", 
         action='store_true')
 parser.add_argument("-l", 
-        help="Include Lead Time Data. Assumes lead begins with \"Open\" and ends with \"Resolved.\"", 
+        help="Include Lead Time Data. Assumes lead begins with \"Open\" and ends with \"Resolved.\" Time is given in minutes.", 
         action='store_true')
 parser.parse_args()
 args = parser.parse_args()
