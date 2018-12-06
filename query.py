@@ -182,6 +182,7 @@ with open(args.csv + ".csv", 'w') as csvfile:
         for path in csv_value_paths:
             expression = jmespath.compile(path[0]) #jmespath expression
             field_value = expression.search(issue)
+            field_value = "" if field_value is None else field_value
             
             if(len(path) == 2):
                 value_format = path[1] #value output format
