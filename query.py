@@ -11,6 +11,7 @@ import datetime
 import dateutil.parser
 import jmespath
 import sys
+import boto3
 
 from aiohttp import ClientSession
 
@@ -48,7 +49,7 @@ def get_response_issues(response_texts):
     for response_text in response_texts:
         issue_page = json.loads(response_text)["issues"]
         all_issues.extend(issue_page)
-    
+
     return all_issues
 
 def get_cycle_data(issue):
@@ -62,14 +63,14 @@ def get_cycle_data(issue):
 
             starts.extend([history_created for item in history["items"] 
                 if item["field"] == "status" and
-                   item["toString"] == "In Progress"])
+                item["toString"] == "In Progress"])
 
             ends.extend([history_created for item in history["items"] 
                 if item["field"] == "status" and
-                   item["toString"] == "Resolved"])
+                item["toString"] == "Resolved"])
 
-        if starts:
-            cycle_start = min(starts)
+            if starts:
+                cycle_start = min(starts)
             cycle_end = max(ends)
             cycle_time = (cycle_end - cycle_start).total_seconds() / 60
 
@@ -88,10 +89,10 @@ def get_lead_data(issue):
 
             ends.extend([history_created for item in history["items"] 
                 if item["field"] == "status" and
-                   item["toString"] == "Resolved"])
+                item["toString"] == "Resolved"])
 
-        if ends:
-            lead_start = dateutil.parser.parse(issue["fields"]["created"])
+            if ends:
+                lead_start = dateutil.parser.parse(issue["fields"]["created"])
             lead_end = max(ends)
             lead_time = (lead_end - lead_start).total_seconds() / 60
 
@@ -109,6 +110,8 @@ parser.add_argument("-c",
 parser.add_argument("-l", 
         help="Include Lead Time Data. Assumes lead begins with \"Open\" and ends with \"Resolved.\" Time is given in minutes.", 
         action='store_true')
+parser.add_argument("--s", help="Name of the s3 bucket", type=str)
+
 parser.parse_args()
 args = parser.parse_args()
 
@@ -174,7 +177,8 @@ csv_value_paths = jmespath.compile('[*].value').search(fields)
 
 print("Writing results to {file_name}.csv".format(file_name=args.csv))
 
-with open(args.csv + ".csv", 'w') as csvfile:
+csv_file_name = args.csv + ".csv"
+with open(csv_file_name, 'w') as csvfile:
     csv_writer = csv.writer(csvfile)
     csv_writer.writerow(csv_columns)
     for issue in all_issues:
@@ -183,7 +187,7 @@ with open(args.csv + ".csv", 'w') as csvfile:
             expression = jmespath.compile(path[0]) #jmespath expression
             field_value = expression.search(issue)
             field_value = "" if field_value is None else field_value
-            
+
             if(len(path) == 2):
                 value_format = path[1] #value output format
                 output_value = value_format.replace('[host]', jira['host']).format(field_value)
@@ -197,5 +201,10 @@ with open(args.csv + ".csv", 'w') as csvfile:
 
         if(args.l):
             issue_values.extend(get_lead_data(issue))
-        
+
         csv_writer.writerow(issue_values)
+
+if(args.s):
+    s3 = boto3.resource("s3")
+    print("Uploading {} to s3://{}/{}".format(csv_file_name, args.s, csv_file_name))
+    s3.Bucket(args.s).upload_file(csv_file_name, csv_file_name)
