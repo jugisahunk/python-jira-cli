@@ -29,6 +29,6 @@ s3transfer==0.1.13
 selenium==3.141.0
 six==1.11.0
 tempora==1.14
-urllib3==1.24.1
+urllib3==1.26.5
 yarl==1.2.6
 zc.lockfile==1.4
